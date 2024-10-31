@@ -1,0 +1,102 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Place {
+  id          String      @id @default(cuid())
+  slug        String      @unique
+  name        String
+  description String
+  location    String
+  mainImage   String
+  gallery     String[]
+  coordinates Json
+  metrics     Json
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  landmarks   Landmark[]
+  activities  Activity[]
+  seasons     Season[]
+  posts       BlogPost[]
+}
+
+model Landmark {
+  id           String    @id @default(cuid())
+  name         String
+  description  String
+  type         String
+  image        String
+  location     Json
+  visitingHours Json
+  entryFee     Json?
+  placeId      String
+  place        Place     @relation(fields: [placeId], references: [id])
+  posts        BlogPost[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model Activity {
+  id          String    @id @default(cuid())
+  name        String
+  description String
+  season      String
+  image       String
+  priceRange  Json
+  difficulty  String
+  duration    Json
+  placeId     String
+  place       Place     @relation(fields: [placeId], references: [id])
+  posts       BlogPost[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Season {
+  id          String    @id @default(cuid())
+  name        String
+  startDate   String
+  endDate     String
+  averageTemp Float
+  description String
+  placeId     String
+  place       Place     @relation(fields: [placeId], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model BlogPost {
+  id          String    @id @default(cuid())
+  title       String
+  slug        String    @unique
+  content     String
+  excerpt     String
+  coverImage  String
+  published   Boolean   @default(false)
+  placeId     String?
+  place       Place?    @relation(fields: [placeId], references: [id])
+  landmarkId  String?
+  landmark    Landmark? @relation(fields: [landmarkId], references: [id])
+  activityId  String?
+  activity    Activity? @relation(fields: [activityId], references: [id])
+  authorId    String
+  author      User      @relation(fields: [authorId], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model User {
+  id        String     @id @default(cuid())
+  email     String     @unique
+  name      String?
+  image     String?
+  role      String     @default("user")
+  posts     BlogPost[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
